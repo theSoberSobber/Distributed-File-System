@@ -1,0 +1,5 @@
+node_modules
+package-lock.json
+datanode.config
+namenode.config
+examples\backup_folder\test*
