@@ -18,10 +18,13 @@ async function testUploadAndQueryIndex() {
 
   // Query the index for the hash
   const indexContent = await fileSystem.queryIndex();
+  console.log(indexContent);
 
   // Check if the hash exists in the index
   assert.ok(indexContent.hasOwnProperty(hash), 'Hash not found in index');
   console.log('Hash found in index:', indexContent[hash]);
+
+  await fileSystem.exit();
 }
 
 // Run the test

@@ -34,13 +34,14 @@ class NameNode {
     }
   }
 
-  async ensureIndex(){
+  async ensureIndex(precautionWait = true){
     try {
       const indexFile = await this.find('index.json');
       
       if (!indexFile) {
         // If index file doesn't exist, create an empty one
         await this.storage.upload('index.json', '{}');
+        if(precautionWait) await sleep(3*1000);
         console.log('Created index.json');
       } else {
         console.log('Index file already exists');

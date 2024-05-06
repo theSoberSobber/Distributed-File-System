@@ -330,7 +330,7 @@ class Node {
 
   }
   
-  module.export = {
+  module.exports = {
     RedBlackTree
   }
   

@@ -36,7 +36,8 @@ class FileSystem {
       // Load gaps from gaps.json into Red-Black Tree
       const gapsJSON = await fs.readFile('gaps.json', 'utf-8');
       const { gaps } = JSON.parse(gapsJSON);
-      gaps.forEach(({ capacity, nodeNum }) => {
+      gaps.forEach((e) => {
+        const capacity = e[0], nodeNum = e[1];
         this.gapsTree.insert(capacity, nodeNum);
       });
 
@@ -48,7 +49,7 @@ class FileSystem {
 
   async commitGaps() {
     try {
-      const gapsJSON = JSON.stringify({ gaps: this.gapsTree.toSortedArray() });
+      const gapsJSON = JSON.stringify({ gaps: this.gapsTree.toSortedSet() });
       await fs.writeFile('gaps.json', gapsJSON);
       console.log('Gaps committed successfully');
     } catch (error) {
@@ -77,46 +78,45 @@ class FileSystem {
         console.log('No space available for file insertion');
 
         // Call subprocess to generate new node
-        await callSubprocess('python genNewNode.py --addToDataNodes', async (error, stdout, stderr) => {
-          if (error) {
-            console.error(`Error generating new node: ${error.message}`);
-            return;
-          }
-          if (stderr) {
-            console.error(`Error generating new node: ${stderr}`);
-            return;
-          }
-          console.log(`New node generated: ${stdout}`);
+        await callSubprocess('python genNewNode.py --addToDataNodes');
+        console.log(`New node generated`);
 
-          // Read datanode.config to get email and password for the new node
-          const datanodeConfig = await fs.readFile('datanode.config', 'utf-8');
-          const { datanodes } = JSON.parse(datanodeConfig);
-          const newNode = datanodes[datanodes.length - 1];
+        // Read datanode.config to get email and password for the new node
+        const datanodeConfig = await fs.readFile('datanode.config', 'utf-8');
+        const { datanodes } = JSON.parse(datanodeConfig);
+        const newNode = datanodes[datanodes.length - 1];
 
-          // Query space total and insert new gap in the Red-Black Tree
-          const dataNode = new DataNode(newNode.email, newNode.password);
-          await dataNode.init();
-          const { spaceTotal, spaceUsed } = await dataNode.queryRemainingSpace();
-          const capacity = spaceTotal - spaceUsed;
-          this.gapsTree.insert(capacity, datanodes.length - 1);
+        // Query space total and insert new gap in the Red-Black Tree
+        console.log(`Trying to Login to new node`);
+        const dataNode = new DataNode(newNode.email, newNode.password);
+        await dataNode.init();
+        console.log(`Logged into the new node`);
+        const { spaceTotal, spaceUsed } = await dataNode.queryRemainingSpace();
+        const capacity = spaceTotal - spaceUsed;
+        this.gapsTree.insert(capacity, datanodes.length - 1);
 
-          // Commit gaps to gaps.json
-          await this.commitGaps();
+        await dataNode.exit();
 
-          // Recursive call to add after new node generation
-          await this.addWithContent(fileName, fileContent);
-        });
+        // Commit gaps to gaps.json
+        await this.commitGaps();
+        console.log("Commited New Node Gap");
+
+        // Recursive call to add after new node generation
+        await this.addWithContent(fileName, fileContent);
 
         // Ensure return to prevent further execution
         return;
       }
+
+      const datanodeConfig = await fs.readFile('datanode.config', 'utf-8');
+      const { datanodes } = JSON.parse(datanodeConfig);
 
       // Initialize DataNode for file insertion
       const dataNode = new DataNode(datanodes[node.nodeNum].email, datanodes[node.nodeNum].password);
       await dataNode.init();
 
       // Upload file to DataNode
-      const { file, shareLink } = await dataNode.uploadFile(fileName, fileContent);
+      const { file, shareLink } = await dataNode.uploadFileWithContent(fileName, fileContent);
 
       // Add entry to NameNode
       const entryValue = { name: fileName, node: node.nodeNum, tags: [], link: shareLink };
@@ -127,7 +127,9 @@ class FileSystem {
       if (node.value - fileSize) this.gapsTree.insert(node.value - fileSize, node.nodeNum);
 
       // Commit gaps to gaps.json
-      this.commitGaps();
+      await this.commitGaps();
+
+      await dataNode.exit();
 
       console.log('File added successfully:', entryValue);
     } catch (error) {
@@ -176,6 +178,11 @@ class FileSystem {
       console.error(`Failed to query index from filesystem: ${error}`);
       return null;
     }
+  }
+
+  async exit(){
+    await this.nameNode.exit();
+    console.log("Connection to Mega Closed Successfully");
   }
 }
 
