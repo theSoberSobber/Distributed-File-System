@@ -66,7 +66,7 @@ class DataNode {
   async readFileContent(fileName) {
     try {
       // Read file content using fs module
-      const fileContent = await fs.readFile(fileName, 'utf8');
+      const fileContent = await fs.readFile(fileName);
       return fileContent;
     } catch (error) {
       console.error(`Failed to read file content ${fileName}: ${error}`);

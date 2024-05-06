@@ -17,12 +17,14 @@ async function backupFolder(folderPath) {
     // Upload each file to the FileSystem
     for (const file of files) {
       const filePath = path.join(folderPath, file);
-      await fileSystem.add(filePath);
+      await fileSystem.addFile(filePath);
     }
 
     // Print summary
     const summary = await fileSystem.summary();
     console.table(summary);
+
+    await fileSystem.exit();
   } catch (error) {
     console.error('Error occurred during backup:', error);
   }

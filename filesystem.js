@@ -140,6 +140,7 @@ class FileSystem {
   async addFile(fileName) {
     try {
       const fileContent = await this.readFileContent(fileName);
+      // console.log(fileContent.length);
       await this.addWithContent(fileName, fileContent);
       console.log(`File added successfully`);
     } catch (error) {
@@ -150,7 +151,7 @@ class FileSystem {
   async readFileContent(fileName) {
     try {
       // Read file content using fs module
-      const fileContent = await fs.readFile(fileName, 'utf8');
+      const fileContent = await fs.readFile(fileName);
       return fileContent;
     } catch (error) {
       console.error(`Failed to read file content ${fileName}: ${error}`);
