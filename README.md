@@ -5,17 +5,21 @@
 - In theory this can use discord or similar services as a filesystem too but since there is no partial file support that would be quite useless.
 
 ### Usage 
+- Copy `setup.ps1` to your folder and run it to create all the necessary files.
+- Fill out your `namenode.config` to setup your namenode.
+
+### Manual
 - Copy `namenode.example.config` to `namenode.config` with your namenode email and password. (if you don't have a namenode account then you can use generate one by `python genNewNode.py`)
 - Do the same for `datanode.example.config` too.
 - Write your own program over the filesystem or use the provided backup script to test.
-- Periodically run `python keep_account_active.py` to ensure your accounts are deleted due to inactivity.
+- Periodically run `python keep_account_active.py` to ensure your accounts aren't deleted due to inactivity.
 
 ### Examples
 - `examples` directory has some sample usage of filesystem module, you may learn from it or read the fs file itself.
 
 ### Documentation
 - `filesystem.js` has the whole filesystem API, there are no docs desciribing the API at the moment but you can refer to the module as it's pretty compact.
-- `Datanode` and `Namenode` are concepts borrowed from [Hadoop](https://hadoop.apache.org/)
+- `Datanode` and `Namenode` are concepts borrowed from [Hadoop](https://hadoop.apache.org/).
 - `Gaps.json` contains the gaps that are left behind on placing complete files in datanode.
 - No Partial File support is implemented, unfortunately this means files of size greater than max data node capacity are not allowed eithe (they will cause the file system to go into an infinite loop, so lookout for that).
 
