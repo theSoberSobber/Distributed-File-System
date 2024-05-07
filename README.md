@@ -7,6 +7,8 @@
 ### Usage 
 - Copy `setup.ps1` to your folder and run it to create all the necessary files.
 - Fill out your `namenode.config` to setup your namenode.
+- Add `|` to your file names, all words between `|` will be used for tags for the file for easy file indexing.
+    - For example: `meow|cat|kitten|biology.pdf` will be interpreted as a file named `meow.pdf` and tags `cat`, `kitten`, `biology`. 
 
 ### Manual
 - Copy `namenode.example.config` to `namenode.config` with your namenode email and password. (if you don't have a namenode account then you can use generate one by `python genNewNode.py`)

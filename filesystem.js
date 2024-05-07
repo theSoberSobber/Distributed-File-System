@@ -118,8 +118,13 @@ class FileSystem {
       // Upload file to DataNode
       const { file, shareLink } = await dataNode.uploadFileWithContent(fileName, fileContent);
 
+      // Extract Tags and ActualFileName from the fileName
+      let [fileName, extension] = fileName.split(".");
+      let [actualFileName, ...tags] = fileName.split("|");
+      actualFileName = actualFileName.split("/").slice(-1) + "." + extension; // remove the folder name from the start
+
       // Add entry to NameNode
-      const entryValue = { name: fileName, node: node.nodeNum, tags: [], link: shareLink };
+      const entryValue = { name: actualFileName, node: node.nodeNum, tags: tags, link: shareLink };
       await this.nameNode.addEntry(hash, entryValue);
 
       // Update the gap with remaining space
